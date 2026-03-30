@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>你的生日宇宙 - 时间筑梦</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #0a0f2a 0%, #0a1a3a 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            max-width: 650px;
+            width: 100%;
+            background: rgba(10, 20, 40, 0.75);
+            backdrop-filter: blur(10px);
+            border-radius: 40px;
+            padding: 24px 20px 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.08);
+            transition: all 0.2s ease;
+            color: #f0f3fc;
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.9rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #fff, #9bb8ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .sub {
+            text-align: center;
+            color: #a9c0f0;
+            margin-bottom: 32px;
+            font-size: 0.9rem;
+            border-bottom: 1px dashed #2e3a6a;
+            display: inline-block;
+            width: auto;
+            margin-left: auto;
+            margin-right: auto;
+            padding-bottom: 6px;
+        }
+        .search-box {
+            background: rgba(0,0,0,0.45);
+            border-radius: 60px;
+            padding: 6px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 30px;
+            backdrop-filter: blur(4px);
+        }
+        input {
+            flex: 2;
+            min-width: 170px;
+            background: #0e162f;
+            border: 1px solid #2f3b6b;
+            padding: 14px 18px;
+            border-radius: 50px;
+            font-size: 1rem;
+            color: white;
+            outline: none;
+            transition: 0.2s;
+        }
+        input:focus {
+            border-color: #6d8eff;
+            box-shadow: 0 0 0 2px rgba(109, 142, 255, 0.3);
+        }
+        button {
+            background: linear-gradient(105deg, #3b4d9e, #1f2b60);
+            border: none;
+            padding: 0 28px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+        button:hover {
+            transform: scale(0.97);
+            background: linear-gradient(105deg, #4f63bc, #2a377a);
+        }
+        .result-area {
+            margin-top: 20px;
+            background: rgba(0,0,0,0.35);
+            border-radius: 32px;
+            padding: 18px;
+            transition: all 0.2s;
+        }
+        .image-wrapper {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+        img {
+            max-width: 100%;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .title {
+            font-size: 1.45rem;
+            font-weight: 600;
+            margin: 12px 0 8px;
+            color: #eef5ff;
+        }
+        .explanation {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #ccddf8;
+            margin-top: 10px;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #bbd4ff;
+        }
+        .error {
+            background: #a1222a30;
+            border-left: 4px solid #ff8a8a;
+            padding: 16px;
+            border-radius: 20px;
+            color: #ffcece;
+        }
+        footer {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 28px;
+            opacity: 0.6;
+        }
+        @media (max-width: 500px) {
+            .card { padding: 20px 16px; }
+            button { padding: 0 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>✨ 生日宇宙 ✨</h1>
+    <div style="text-align: center;">
+        <div class="sub">NASA · 哈勃/韦伯的星空记忆</div>
+    </div>
+    <div class="search-box">
+        <input type="date" id="birthdayInput" value="1995-08-22">
+        <button id="searchBtn">🌌 探索我的宇宙</button>
+    </div>
+    <div id="result" class="result-area">
+        <div class="loading">⭐ 选择日期，点击探索<br>NASA的宇宙情书为你展开</div>
+    </div>
+    <footer>© 时间筑梦 · 宇宙很大，能遇到就是缘分</footer>
+</div>
+
+<script>
+    // ⭐ 1. 在这里替换成你申请到的 NASA API 密钥
+    const NASA_API_KEY = 'JDXQ0r9HamcicdUuJPjjC7qLP3ejLDeGrYNURfH4';   // ← 请把 '你的API密钥' 替换成你申请到的真实密钥，保留引号
+
+    // DOM 元素
+    const birthdayInput = document.getElementById('birthdayInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const resultDiv = document.getElementById('result');
+
+    // 辅助函数：格式化显示
+    function showLoading() {
+        resultDiv.innerHTML = `<div class="loading">🌠 正在连接宇宙 · 请稍候 🌠</div>`;
+    }
+    function showError(msg) {
+        resultDiv.innerHTML = `<div class="error">⚠️ ${msg}<br>💡 试试其他日期，或稍后再来～</div>`;
+    }
+    function showResult(apodData) {
+        // 兼容图片地址（高清图优先）
+        let imageUrl = apodData.hdurl || apodData.url;
+        if (!imageUrl) {
+            showError("这张宇宙明信片暂时无法显示，换个日期吧✨");
+            return;
+        }
+        const title = apodData.title || "无题";
+        const explanation = apodData.explanation || "NASA没有留下关于这一天的故事，但宇宙依然为你闪耀。";
+        const date = apodData.date || birthdayInput.value;
+        
+        const html = `
+            <div class="image-wrapper">
+                <img src="${imageUrl}" alt="APOD: ${title}" loading="lazy">
+            </div>
+            <div class="title">📅 ${date} · ${title}</div>
+            <div class="explanation">${explanation}</div>
+            <div style="margin-top: 16px; font-size: 12px; opacity:0.6;">✨ 图片来源：NASA Astronomy Picture of the Day</div>
+        `;
+        resultDiv.innerHTML = html;
+    }
+
+    // 核心：请求 NASA API
+    async function fetchNASAByDate(dateStr) {
+        if (!dateStr) {
+            showError("请先选择日期✨");
+            return;
+        }
+        // 简单校验格式 YYYY-MM-DD
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+            showError("日期格式不对，请用 yyyy-mm-dd");
+            return;
+        }
+        showLoading();
+        try {
+            // 注意：api_key 使用你自己的 key，不用 DEMO_KEY
+            const url = `https://api.nasa.gov/planetary/apod?api_key=${NASA_API_KEY}&date=${dateStr}`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                // 429 是限流，403/401是key无效，其他可能是日期没数据
+                if (response.status === 429) {
+                    throw new Error("宇宙访客有点多～ 请稍后再试 (API 限流)");
+                } else if (response.status === 403 || response.status === 401) {
+                    throw new Error("NASA 访问密钥无效，请联系小店更新✨");
+                } else {
+                    throw new Error(`NASA 返回错误 (${response.status})`);
+                }
+            }
+            const data = await response.json();
+            // 如果返回的错误信息（比如日期无效或没有图片）
+            if (data.code && data.code >= 400) {
+                throw new Error(data.msg || "这一天NASA没有公开图片，换一天试试吧～");
+            }
+            showResult(data);
+        } catch (err) {
+            console.error(err);
+            showError(err.message || "网络好像迷失在银河了，稍后再试试吧🌌");
+        }
+    }
+
+    // 绑定事件
+    searchBtn.addEventListener('click', () => {
+        const selectedDate = birthdayInput.value;
+        if (!selectedDate) {
+            showError("请先选择你的生日或纪念日🎂");
+            return;
+        }
+        fetchNASAByDate(selectedDate);
+    });
+
+    // 可选：页面加载时默认展示一个美丽日期（比如1995-08-22）
+    if (birthdayInput.value) {
+        // 不自动请求，避免消耗过多；但如果你想展示一张默认图片，可以打开注释
+        // fetchNASAByDate(birthdayInput.value);
+    }
+</script>
+</body>
+</html>
